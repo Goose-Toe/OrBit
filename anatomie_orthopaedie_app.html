@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <title>Anatomie & Orthopädie Lernen</title>
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%230ea5e9' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='65' font-size='45' text-anchor='middle' fill='white'%3E🦴%3C/text%3E%3C/svg%3E">
+    <style>
+        :root {
+            --bg: #0f172a; --card: #1e293b; --card2: #334155;
+            --accent: #0ea5e9; --accent2: #22d3ee; --success: #22c55e;
+            --danger: #ef4444; --warn: #f59e0b; --text: #f1f5f9; --text2: #94a3b8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+        .screen { display: none; padding: 20px; padding-bottom: 100px; }
+        .screen.active { display: block; }
+        .header { text-align: center; padding: 30px 0 20px; }
+        .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { color: var(--text2); margin-top: 6px; font-size: 14px; }
+        .stats-bar { display: flex; justify-content: space-around; background: var(--card); border-radius: 16px; padding: 16px; margin: 0 0 20px; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+        .card { background: var(--card); border-radius: 20px; padding: 24px; margin-bottom: 16px; border: 1px solid var(--card2); transition: transform 0.2s; }
+        .card:active { transform: scale(0.98); }
+        .card-title { font-size: 13px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 12px; }
+        .card h2 { font-size: 20px; margin-bottom: 12px; line-height: 1.3; }
+        .card p { color: var(--text2); line-height: 1.6; font-size: 15px; }
+        .fact-card { background: linear-gradient(135deg, var(--card) 0%, #1a2744 100%); border: 1px solid rgba(14,165,233,0.2); }
+        .fact-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--card2); }
+        .fact-detail h4 { color: var(--accent2); font-size: 13px; margin-bottom: 8px; }
+        .fact-detail ul { list-style: none; }
+        .fact-detail li { padding: 6px 0; color: var(--text2); font-size: 14px; padding-left: 20px; position: relative; }
+        .fact-detail li::before { content: "›"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+        .reference { margin-top: 16px; padding: 12px 16px; background: rgba(14,165,233,0.08); border-radius: 12px; font-size: 12px; color: var(--text2); border-left: 3px solid var(--accent); }
+        .reference strong { color: var(--accent); }
+        .btn { display: block; width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; text-align: center; }
+        .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
+        .btn-secondary { background: var(--card2); color: var(--text); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
+        .btn:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-small { width: auto; padding: 10px 20px; font-size: 14px; display: inline-block; margin-right: 8px; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .quiz-progress { height: 6px; background: var(--card2); border-radius: 3px; margin-bottom: 24px; overflow: hidden; }
+        .quiz-progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.3s; }
+        .quiz-question { font-size: 18px; font-weight: 600; margin-bottom: 24px; line-height: 1.4; }
+        .quiz-option { background: var(--card); border: 2px solid var(--card2); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; font-size: 15px; }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.correct { border-color: var(--success); background: rgba(34,197,94,0.1); }
+        .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+        .explanation { background: var(--card2); border-radius: 14px; padding: 20px; margin-top: 20px; display: none; }
+        .explanation.show { display: block; }
+        .explanation h4 { color: var(--accent2); margin-bottom: 8px; }
+        .result-circle { width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(var(--accent) calc(var(--pct) * 3.6deg), var(--card2) 0); margin: 30px auto; display: flex; align-items: center; justify-content: center; position: relative; }
+        .result-circle::before { content: ""; width: 130px; height: 130px; border-radius: 50%; background: var(--bg); position: absolute; }
+        .result-text { position: relative; z-index: 1; font-size: 36px; font-weight: 700; color: var(--accent); }
+        .result-message { text-align: center; margin-bottom: 30px; }
+        .result-message h2 { margin-bottom: 8px; }
+        .result-message p { color: var(--text2); }
+        .topic-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+        .topic-tag { background: var(--card2); padding: 6px 14px; border-radius: 20px; font-size: 12px; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+        .topic-tag.active { background: var(--accent); color: white; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--card2); display: flex; justify-content: space-around; padding: 8px 0 30px; z-index: 100; }
+        .nav-item { flex: 1; text-align: center; padding: 8px; cursor: pointer; color: var(--text2); font-size: 11px; transition: color 0.2s; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item .icon { font-size: 22px; display: block; margin-bottom: 2px; }
+        .streak-flame { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #f97316, #ef4444); padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+        .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 16px 0; }
+        .week-day { aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .week-day.done { background: var(--success); color: white; }
+        .week-day.missed { background: var(--danger); opacity: 0.5; }
+        .week-day.today { background: var(--accent); color: white; }
+        .week-day.future { background: var(--card2); color: var(--text2); }
+        ::-webkit-scrollbar { width: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeIn 0.4s ease; }
+        .difficulty-badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+        .difficulty-easy { background: rgba(34,197,94,0.2); color: var(--success); }
+        .difficulty-medium { background: rgba(245,158,11,0.2); color: var(--warn); }
+        .difficulty-hard { background: rgba(239,68,68,0.2); color: var(--danger); }
+        .ortho-highlight { background: linear-gradient(135deg, rgba(14,165,233,0.1), rgba(34,211,238,0.05)); border-left: 4px solid var(--accent); padding: 16px; border-radius: 0 14px 14px 0; margin: 12px 0; }
+        .ortho-highlight h4 { color: var(--accent2); font-size: 13px; margin-bottom: 6px; }
+        .ortho-highlight p { color: var(--text2); font-size: 14px; line-height: 1.5; }
+        .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; margin-bottom: 16px; }
+        .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--card2); background: var(--card); color: var(--text2); font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .week-selector { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; margin-bottom: 16px; }
+        .week-btn { padding: 10px 16px; border-radius: 12px; border: 1px solid var(--card2); background: var(--card); color: var(--text2); font-size: 14px; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-weight: 600; }
+        .week-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .week-btn.completed { background: rgba(34,197,94,0.2); color: var(--success); border-color: var(--success); }
+        .fact-item { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 12px; border: 1px solid var(--card2); cursor: pointer; transition: all 0.2s; }
+        .fact-item:hover { border-color: var(--accent); }
+        .fact-item.completed { border-color: var(--success); opacity: 0.7; }
+        .fact-item.completed::after { content: "✓"; float: right; color: var(--success); font-size: 20px; }
+        .fact-item h3 { font-size: 16px; margin-bottom: 6px; }
+        .fact-item p { color: var(--text2); font-size: 13px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--card); border-radius: 24px; padding: 24px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--card2); }
+        .modal-close { float: right; font-size: 24px; cursor: pointer; color: var(--text2); }
+        .progress-ring { width: 120px; height: 120px; margin: 0 auto 20px; }
+        .progress-ring-circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
+    </style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div class="screen active" id="screen-home">
+    <div class="header">
+        <div class="streak-flame">🔥 <span id="streak-count">0</span> Tage Streak</div>
+        <h1 style="margin-top:16px">Anatomie & Orthopädie</h1>
+        <p>Duale Reihe, Orthopädie & Unfallchirurgie</p>
+    </div>
+    <div class="stats-bar">
+        <div class="stat"><div class="stat-value" id="total-facts">0</div><div class="stat-label">Fakten gelernt</div></div>
+        <div class="stat"><div class="stat-value" id="total-quiz">0</div><div class="stat-label">Quiz gemacht</div></div>
+        <div class="stat"><div class="stat-value" id="avg-score">0%</div><div class="stat-label">Ø Ergebnis</div></div>
+    </div>
+    <div class="card" onclick="showScreen('screen-daily')">
+        <div class="card-title">Heutige Lektion</div>
+        <h2 id="daily-preview">Lade...</h2>
+        <p>Bewegungsapparat, Blutgefäße & Nerven</p>
+        <button class="btn btn-primary" style="margin-top:16px">Lernen starten</button>
+    </div>
+    <div class="card" onclick="showScreen('screen-weekly')">
+        <div class="card-title">Wöchentliche Prüfung</div>
+        <h2>Prüfungsmodul</h2>
+        <p>Teste dein Wissen über alle bisherigen Themen</p>
+        <div class="week-grid" id="week-grid"></div>
+        <button class="btn btn-outline" id="week-btn">Zur Prüfung</button>
+    </div>
+    <div class="card" onclick="showScreen('screen-topics')">
+        <div class="card-title">Themenübersicht</div>
+        <h2>Alle Lernbereiche</h2>
+        <p>Osteologie, Arthrologie, Myologie, Blutgefäße, Nerven, Orthopädie</p>
+        <div class="topic-tags" style="margin-top:12px">
+            <span class="topic-tag">Osteologie</span><span class="topic-tag">Arthrologie</span><span class="topic-tag">Myologie</span>
+            <span class="topic-tag">Orthopädie</span><span class="topic-tag">Neuroanatomie</span>
+        </div>
+    </div>
+    <div class="card" onclick="showScreen('screen-progress')">
+        <div class="card-title">Fortschritt</div>
+        <h2>Dein Lernpfad</h2>
+        <p>Übersicht über alle absolvierten Module</p>
+    </div>
+</div>
+
+<!-- DAILY FACTS SCREEN -->
+<div class="screen" id="screen-daily">
+    <div class="header">
+        <button class="btn btn-secondary btn-small" onclick="showScreen('screen-home')">← Zurück</button>
+        <h1 style="margin-top:12px">Heutige Lektion</h1>
+        <p id="daily-date"></p>
+    </div>
+    <div id="daily-facts-container"></div>
+    <button class="btn btn-primary" onclick="markDailyDone()" id="done-btn">✓ Lektion abschließen</button>
+</div>
+
+<!-- WEEKLY QUIZ SCREEN -->
+<div class="screen" id="screen-weekly">
+    <div class="header">
+        <button class="btn btn-secondary btn-small" onclick="showScreen('screen-home')">← Zurück</button>
+        <h1 style="margin-top:12px">Wöchentliche Prüfung</h1>
+        <p>Wähle die Wochen für dein Quiz</p>
+    </div>
+    <div class="week-selector" id="week-selector"></div>
+    <div id="quiz-container" style="display:none">
+        <div class="quiz-progress"><div class="quiz-progress-bar" id="quiz-progress" style="width:0%"></div></div>
+        <div id="quiz-content"></div>
+    </div>
+    <div id="quiz-start-panel">
+        <div class="card">
+            <h2>📋 Quiz-Einstellungen</h2>
+            <p style="margin:12px 0">Wähle oben die Wochen aus, die du üben möchtest. Du kannst mehrere Wochen kombinieren oder alle auf einmal testen.</p>
+            <div style="margin-top:16px">
+                <label style="color:var(--text2);font-size:14px">Anzahl Fragen:</label>
+                <div class="topic-tags" style="margin-top:8px">
+                    <span class="topic-tag active" onclick="setQuestionCount(10,this)" data-count="10">10 Fragen</span>
+                    <span class="topic-tag" onclick="setQuestionCount(20,this)" data-count="20">20 Fragen</span>
+                    <span class="topic-tag" onclick="setQuestionCount(30,this)" data-count="30">30 Fragen</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:20px" onclick="startWeeklyQuiz()" id="start-quiz-btn" disabled>Quiz starten</button>
+        </div>
+    </div>
+</div>
+
+<!-- QUIZ RESULT SCREEN -->
+<div class="screen" id="screen-result">
+    <div class="header"><h1>Prüfungsergebnis</h1></div>
+    <div class="result-circle" id="result-circle" style="--pct:0"><span class="result-text" id="result-percent">0%</span></div>
+    <div class="result-message"><h2 id="result-title"></h2><p id="result-subtitle"></p></div>
+    <div id="result-details"></div>
+    <button class="btn btn-primary" onclick="showScreen('screen-home')">Zurück zur Übersicht</button>
+    <button class="btn btn-secondary" onclick="restartQuiz()">Quiz wiederholen</button>
+</div>
+
+<!-- TOPICS SCREEN -->
+<div class="screen" id="screen-topics">
+    <div class="header">
+        <button class="btn btn-secondary btn-small" onclick="showScreen('screen-home')">← Zurück</button>
+        <h1 style="margin-top:12px">Themenübersicht</h1>
+    </div>
+    <div class="filter-bar" id="topic-filters">
+        <button class="filter-btn active" onclick="filterTopics('all')">Alle</button>
+        <button class="filter-btn" onclick="filterTopics('Osteologie')">Osteologie</button>
+        <button class="filter-btn" onclick="filterTopics('Arthrologie')">Arthrologie</button>
+        <button class="filter-btn" onclick="filterTopics('Myologie')">Myologie</button>
+        <button class="filter-btn" onclick="filterTopics('Blutgefäße')">Blutgefäße</button>
+        <button class="filter-btn" onclick="filterTopics('Nerven')">Nerven</button>
+        <button class="filter-btn" onclick="filterTopics('Orthopädie')">Orthopädie</button>
+    </div>
+    <div id="topics-container"></div>
+</div>
+
+<!-- PROGRESS SCREEN -->
+<div class="screen" id="screen-progress">
+    <div class="header">
+        <button class="btn btn-secondary btn-small" onclick="showScreen('screen-home')">← Zurück</button>
+        <h1 style="margin-top:12px">Fortschritt</h1>
+    </div>
+    <div id="progress-container"></div>
+</div>
+
+<!-- FACT DETAIL MODAL -->
+<div class="modal-overlay" id="fact-modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="showScreen('screen-home')"><span class="icon">🏠</span>Start</div>
+    <div class="nav-item" onclick="showScreen('screen-daily')"><span class="icon">📚</span>Lernen</div>
+    <div class="nav-item" onclick="showScreen('screen-weekly')"><span class="icon">📝</span>Prüfung</div>
+    <div class="nav-item" onclick="showScreen('screen-progress')"><span class="icon">📊</span>Stats</div>
+</div>
+
+<script>
+
+// ==================== DATENBANK: ANATOMIE-FAKTEN ====================
+// 56 Fakten über 8 Wochen: Osteologie, Arthrologie, Myologie, Blutgefäße, Nerven, Orthopädie
+
+const anatomyFacts = [
+    // ===== WOCHE 1: OSTEOLOGIE =====
+    { id: 1, week: 1, day: 1, category: "Osteologie", difficulty: "medium",
+      title: "Knochenklassifikation nach Form",
+      content: "Der menschliche Skelett besteht aus 206 Knochen, die nach ihrer Form in 5 Klassen eingeteilt werden.",
+      details: ["Röhrenknochen (Ossa longa): Diaphyse + Epiphysen, z.B. Humerus, Femur","Kurze Knochen (Ossa brevia): Würfelförmig, z.B. Handwurzelknochen","Platte Knochen (Ossa plana): Schutzfunktion, z.B. Schädelkalotte","Irreguläre Knochen (Ossa irregularia): z.B. Wirbel, Os sacrum","Sesambeine (Ossa sesamoidea): In Sehnen eingelagert, z.B. Patella"],
+      orthoNote: "Patella als größtes Sesambein: Dislokation meist lateral bei Genu valgum. Quadriceps-Atrophie nach Immobilisation führt zu Patella alta.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 46-48" },
+    { id: 2, week: 1, day: 2, category: "Osteologie", difficulty: "hard",
+      title: "Knochenbau und Blutversorgung",
+      content: "Der Knochen ist ein hochdynamisches, vaskularisiertes Organ mit komplexer innerer Architektur.",
+      details: ["Kortikalis (Substantia compacta): Dichte Außenschicht, Lamellenbau mit Osteonen","Spongiosa (Substantia spongiosa): Trabekelstruktur, Richtung der Hauptspannungslinien","Markhöhle (Cavitas medullaris): Gelbes oder rotes Mark","Vasa nutricia: Hauptgefäße durch Foramen nutricium","Periost: Außen, Endost: Innen – für Apposition und Resorption"],
+      orthoNote: "Knochenbruchheilung: Hämatom → Granulationsgewebe → Knorpelcallus → Knochencallus → Remodeling. Kritische Blutversorgung bestimmt Heilungserfolg.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 50-54" },
+    { id: 3, week: 1, day: 3, category: "Osteologie", difficulty: "hard",
+      title: "Ossifikation und Wachstumsfugen",
+      content: "Die Knochenentwicklung erfolgt durch desmale oder chondrale Ossifikation.",
+      details: ["Desmale Ossifikation: Direkt aus Mesenchym, z.B. Schädelkalotte, Clavicula","Chondrale Ossifikation: Über Knorpelmodell, z.B. Röhrenknochen","Epiphysenfuge: Reservezone, Proliferationszone, Hypertrophiezone, Verkalkungszone","Appositionelles Wachstum: Durch Periost und Endost","Wachstumsfugenverschluss: Proximaler Humerus ~20 J., distaler Femur ~19 J."],
+      orthoNote: "Epiphysiolysis capitis femoris (SCFE): Gleitender Durchbruch durch Wachstumsfuge proximaler Femur. Notfall bei Verschiebung >50%.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 56-59" },
+    { id: 4, week: 1, day: 4, category: "Osteologie", difficulty: "medium",
+      title: "Schultergürtel – Os scapulae & Clavicula",
+      content: "Der Schultergürtel verbindet die obere Extremität mit dem Rumpf.",
+      details: ["Scapula: Dreieckige Flachknochen, Fossa supraspinata + infraspinata","Angulus inferior: Orientierungspunkt für die 7. Rippe","Cavitas glenoidalis: Nur 1/3 des Humeruskopfes bedeckend","Clavicula: S-förmig, mediales 2/3 konvex, laterales 1/3 konkav","Clavicula-Fraktur: Häufigste Fraktur des Schultergürtels"],
+      orthoNote: "Clavicula-Fraktur: Allman-Klassifikation (I-III). Mittleres Drittel 80%. Konservativ bei <100% Verschiebung.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 134-138" },
+    { id: 5, week: 1, day: 5, category: "Osteologie", difficulty: "hard",
+      title: "Humerus – Oberarmknochen",
+      content: "Der Humerus ist der längste Knochen der oberen Extremität.",
+      details: ["Caput humeri: Halbkugelförmig, nach medial und dorsal gerichtet","Tuberculum majus: Insertion Rotatorenmanschette (SITS)","Tuberculum minus: Insertion M. subscapularis","Sulcus intertubercularis: Bicipitalrinne","Epicondylus medialis/lateralis: Ursprung Flexoren/Extensoren"],
+      orthoNote: "Humerusschaftfraktur: Radialis-Lähmung (Sulcus nervi radialis!) häufigste Nervenkomplikation. AO-Klassifikation: A/B/C.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 140-144" },
+    { id: 6, week: 1, day: 6, category: "Osteologie", difficulty: "hard",
+      title: "Radius & Ulna – Unterarmknochen",
+      content: "Radius und Ulna bilden die Unterarmrotation (Pronation/Supination).",
+      details: ["Radius: Lateral, Caput radii mit Fovea articularis","Tuberositas radii: Insertion M. biceps brachii","Processus styloideus radii: 1cm distal der Ulna-Styloid","Ulna: Medial, Olecranon mit Trochlearnotch","Membrana interossea: Verbindung Radius-Ulna"],
+      orthoNote: "Monteggia-Fraktur: Ulna-Schaftfraktur + Radiusköpfchen-Luxation. Galeazzi-Fraktur: Radius-Schaftfraktur + distale Radioulnar-Luxation.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 146-150" },
+    { id: 7, week: 1, day: 7, category: "Osteologie", difficulty: "hard",
+      title: "Handwurzelknochen (Ossa carpi)",
+      content: "8 Handwurzelknochen in zwei Reihen bilden komplexe Gelenke.",
+      details: ["Proximale Reihe: Os scaphoideum, lunatum, triquetrum, pisiforme","Distale Reihe: Os trapezium, trapezoideum, capitatum, hamatum","Os scaphoideum: Häufigste Fraktur, Blutversorgung vom distalen Pol","Kahnbeinpseudarthrose: Risiko durch kritische Blutversorgung","Arcus carpi: Stabilität durch Ligamente"],
+      orthoNote: "Scaphoid-Fraktur: Herbert-Klassifikation (A-D). Dislozierte Frakturen >1mm → ORIF. Pseudarthrose-Risiko 5-15%.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 152-156" },
+
+    // ===== WOCHE 2: BECKEN & UNTERE EXTREMITÄT =====
+    { id: 8, week: 2, day: 1, category: "Osteologie", difficulty: "hard",
+      title: "Becken – Os coxae",
+      content: "Das Hüftbein entsteht durch Verschmelzung von Os ilium, ischii und pubis.",
+      details: ["Acetabulum: Fovea acetabuli, Incisura acetabuli","Spina iliaca anterior superior (SIAS): Orientierungspunkt","Crista iliaca: Ursprung M. gluteus medius/minimus","Foramen obturatum: Durchtritt N. obturatorius","Symphyse: Fibrocartilaginäre Verbindung"],
+      orthoNote: "Acetabulum-Fraktur: Letournel-Klassifikation (10 Typen). Posterior wall häufigste, assoziiert mit Hüftluxation.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 160-166" },
+    { id: 9, week: 2, day: 2, category: "Osteologie", difficulty: "hard",
+      title: "Femur – Oberschenkelknochen",
+      content: "Der Femur ist der längste und stärkste Knochen des Körpers.",
+      details: ["Caput femoris: Antetorsion ~12-15°","Collum femoris: Winkel ~126° (Coxa vara <120°, valga >135°)","Trochanter major: Insertion Mm. glutei","Trochanter minor: Insertion M. iliopsoas","Linea aspera: Dreikantige Leiste"],
+      orthoNote: "Schenkelhalsfraktur: Garden-Klassifikation (I-IV). AVN-Risiko bei Garden III/IV: 15-50%. Hemiarthroplastik vs. THA.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 168-174" },
+    { id: 10, week: 2, day: 3, category: "Osteologie", difficulty: "medium",
+      title: "Patella & Tibia",
+      content: "Patella verlängert den Hebelarm des Quadrizeps; Tibia überträgt das Körpergewicht.",
+      details: ["Patella: Sesambein in Quadrizepssehne","Patella alta/baja: Abnorme Höhe","Tibia: Condylus medialis/lateralis, Eminentia intercondylaris","Tuberositas tibiae: Insertion Lig. patellae","Malleolus medialis: Distale Tibia"],
+      orthoNote: "Patella-Fraktur: Transversale Fraktur (60%). Operativ bei Dislokation >2mm, offene Frakturen.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 176-182" },
+    { id: 11, week: 2, day: 4, category: "Osteologie", difficulty: "hard",
+      title: "Fibula & Fußwurzelknochen",
+      content: "Die Fibula ist nicht gewichtstragend, aber essentiell für Syndesmose-Stabilität.",
+      details: ["Fibula: Caput fibulae, Collum fibulae (N. fibularis communis!)","Malleolus lateralis: Distale Fibula","Talus: Trochlea tali, Sustentaculum tali","Calcaneus: Tuberositas (Achillessehne)","Lisfranc-Gelenklinie: Basis Metatarsalia 1-5"],
+      orthoNote: "Calcaneus-Fraktur: Sanders-Klassifikation (I-IV). Bohler-Winkel <20°: ORIF-Indikation.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 184-190" },
+    { id: 12, week: 2, day: 5, category: "Osteologie", difficulty: "medium",
+      title: "Wirbelsäule – Allgemeine Anatomie",
+      content: "Die Wirbelsäule besteht aus 33-34 Wirbeln.",
+      details: ["7 Halswirbel, 12 Brustwirbel, 5 Lendenwirbel, Os sacrum, Os coccygis","Curvaturae: Cervicalis lordotisch, Thoracalis kyphotisch, Lumbalis lordotisch","Corpus vertebrae: Spongiosa mit Bandscheiben","Arcus vertebrae: Pedikel + Lamina","Processus transversus: Foramen transversarium (nur HWK)"],
+      orthoNote: "Spondylolisthesis: Meyerding-Grad I-V. Operativ bei neurologischen Defiziten oder Instabilität >Grad II.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 90-98" },
+    { id: 13, week: 2, day: 6, category: "Osteologie", difficulty: "hard",
+      title: "Atlas (C1) & Axis (C2)",
+      content: "C1 und C2 bilden ein spezialisiertes Gelenk für Kopfdrehung.",
+      details: ["Atlas (C1): Kein Corpus, nur anteriorer + posteriorer Bogen","Dens axis: Zahnfortsatz von C2","Membrana atlantooccipitalis: Verbindung Schädelbasis-Atlas","Lig. transversum atlantis: Wichtigste Stabilität","Fractur dens: Typ I (Spitze), II (Basis), III (Corpus)"],
+      orthoNote: "Dens-Fraktur Typ II: Instabilste Form, Pseudarthrose-Risiko 30-50%. Operativ bei Dislokation >6mm.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 100-104" },
+    { id: 14, week: 2, day: 7, category: "Osteologie", difficulty: "medium",
+      title: "Schädel – Neurocranium",
+      content: "Das Hirnschädel schützt das Gehirn.",
+      details: ["Calvaria: Frontale, Parietale, Occipitale, Temporale, Sphenoidale, Ethmoidale","Basis cranii: Fossa cranii anterior/medium/posterior","Foramen magnum: Medulla oblongata, Aa. vertebrales","Canalis hypoglossi: N. hypoglossus (XII)","Sutura sagittalis, coronalis, lambdoidea"],
+      orthoNote: "Schädelbasisfraktur: Liquorrho, Raccoon eyes, Battle-Zeichen. CT mit Knochenfenster ist Goldstandard.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 70-80" },
+
+    // ===== WOCHE 3: ARTHROLOGIE =====
+    { id: 15, week: 3, day: 1, category: "Arthrologie", difficulty: "medium",
+      title: "Gelenktypen und Gelenkklassifikation",
+      content: "Gelenke werden nach Achsen, Gelenkflächenform und Gewebeart klassifiziert.",
+      details: ["Synarthrosen: Synchondrose, Syndesmose, Synostose","Diarthrosen: Gelenkkapsel, Gelenkspalt, Synovia","1-Achsen: Scharniergelenk (z.B. Humeroulnar)","2-Achsen: Ellipsoidgelenk (z.B. Radiocarpal)","3-Achsen: Kugelgelenk (z.B. Hüfte, Schulter)"],
+      orthoNote: "Syndesmose: Weber C-Frakturen immer mit Syndesmosenläsion. Fixation mit Syndesmosenschraube bei Instabilität.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 60-66" },
+    { id: 16, week: 3, day: 2, category: "Arthrologie", difficulty: "hard",
+      title: "Schultergelenk (Articulatio humeri)",
+      content: "Das Schultergelenk ist das beweglichste, aber auch instabilste Kugelgelenk.",
+      details: ["Cavitas glenoidalis nur 1/3 des Humeruskopfes","Kapsel: Ligg. glenohumeralia (superius, medium, inferius)","Rotatorenmanschette: SITS (supra, infra, teres minor, subscapularis)","Bursa subacromialis: Impingement bei Einengung","Luxation: 95% anterior-inferior"],
+      orthoNote: "Bankart-Läsion: Ablösung anteroinferioren Labrums bei anteriorer Luxation. Operativ bei <30 J. (Rezidivrisiko >80% konservativ).",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 200-206" },
+    { id: 17, week: 3, day: 3, category: "Arthrologie", difficulty: "hard",
+      title: "Ellenbogen – Articulatio cubiti",
+      content: "Der Ellenbogen ist ein Kompositgelenk aus drei Einzelgelenken.",
+      details: ["Humeroulnaris: Trochlea + Incisura trochlearis (Scharnier)","Humeroradialis: Capitulum + Fovea capitis radii","Radioulnaris proximalis: Drehgelenk","Lig. collaterale ulnare: Dreibändig, medial","Lig. collaterale radiale: Fächerförmig"],
+      orthoNote: "Terrible Triad: Ellenbogenluxation + Radiusköpfchen-Fraktur + Koronoid-Fraktur. ORIF aller Strukturen nötig.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 208-214" },
+    { id: 18, week: 3, day: 4, category: "Arthrologie", difficulty: "hard",
+      title: "Hüftgelenk (Articulatio coxae)",
+      content: "Das Hüftgelenk ist ein stabiles Kugelgelenk für Gewichtstransfer.",
+      details: ["Acetabulum: Labrum acetabulare verbreitert Pfanne","Kapsel: Ligg. iliofemorale, pubofemorale, ischiofemorale","Lig. iliofemorale (Bertin): Stärkstes Band des Körpers","Lig. capitis femoris: Wichtig für Hüftkopf-Blutversorgung","Hüftdysplasie: Acetabulum-Index >25°"],
+      orthoNote: "Hüftdysplasie: Graf-Klassifikation (I-IV) via Sonographie. Pavlik-Bandage bei Dysplasie/Luxation <6 Monate.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 216-222" },
+    { id: 19, week: 3, day: 5, category: "Arthrologie", difficulty: "hard",
+      title: "Kniegelenk (Articulatio genus)",
+      content: "Das Knie ist das größte und komplexeste Gelenk.",
+      details: ["Condylus medialis/lateralis femoris + Tibiaplateau","Menisci: C-förmig (medial) vs. O-förmig (lateral)","ACL: Vom lateralen Femurkondylus zum medialen Tibiaplateau","LCL: Lateral, rund, isoliert; MCL: Medial, flach, mit Kapsel","Unhappy Triad: ACL + MCL + Meniscus"],
+      orthoNote: "ACL-Ruptur: Lachman-Test (sensitivster), Pivot-shift (Goldstandard). Return to Sport frühestens 9-12 Monate.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 224-234" },
+    { id: 20, week: 3, day: 6, category: "Arthrologie", difficulty: "hard",
+      title: "Kniegelenk – Bewegungen und Stabilität",
+      content: "Das Knie ermöglicht Beugen/Strecken und Schlussrotation.",
+      details: ["Screw-home mechanism: Automatische Schlussrotation","Retinacula patellae: Mediale/laterale Stabilisierung","Plica synovialis: Reste embryonaler Gelenktrennung","Bursae: Suprapatellaris, prepatellaris, infrapatellaris","Patellaluxation: 90% lateral"],
+      orthoNote: "Patellaluxation: MPFL-Rekonstruktion bei Rezidiv. Trochleaplastik bei schwerer Dysplasie (Dejour B/C/D).",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 236-240" },
+    { id: 21, week: 3, day: 7, category: "Arthrologie", difficulty: "hard",
+      title: "Sprunggelenk und Fußgelenke",
+      content: "Der Fuß bildet ein komplexes Gewölbe für Stoßdämpfung und Vortrieb.",
+      details: ["Talocruralis: Hinge-Gelenk, Malleoli umschließen Trochlea tali","Syndesmose: AITFL, PITFL, Membrana interossea","Lig. deltoideum: Medial, 4 Anteile","Lateral: ATFL (häufigste Bandverletzung), CFL, PTFL","Fußgewölbe: Längs- und Quergewölbe"],
+      orthoNote: "Weber-Klassifikation: A (unterhalb), B (auf Höhe), C (oberhalb = Syndesmosenläsion). ORIF bei Dislokation.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 242-250" },
+
+    // ===== WOCHE 4: MYOLOGIE =====
+    { id: 22, week: 4, day: 1, category: "Myologie", difficulty: "medium",
+      title: "Muskeltypen und Muskelarchitektur",
+      content: "Skelettmuskeln werden nach Faserverlauf, Form und Funktion klassifiziert.",
+      details: ["Quergestreifte Skelettmuskulatur: Sarkomer als kontraktile Einheit","Fusiforme Muskeln: Große Amplitude, moderate Kraft","Pennate Muskeln: Große Kraft, geringe Amplitude","Mehrbäuchige Muskeln: z.B. Triceps surae (3 Köpfe)","Agonist/Antagonist/Synergist"],
+      orthoNote: "Muskelatrophie nach Immobilisation: 10-15% Kraftverlust pro Woche. Frühe Mobilisation essentiell.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 260-268" },
+    { id: 23, week: 4, day: 2, category: "Myologie", difficulty: "hard",
+      title: "Schultermuskulatur – Rotatorenmanschette",
+      content: "Die Rotatorenmanschette (SITS) stabilisiert das Schultergelenk.",
+      details: ["M. supraspinatus: Initiiert Abduktion (0-15°)","M. infraspinatus: Außenrotation, Adduktion","M. teres minor: Außenrotation","M. subscapularis: Innenrotation, wichtigste Stabilisierung","Impingement: Supraspinatus-Sehne eingeklemmt"],
+      orthoNote: "Rotatorenmanschettenruptur: Jobe-Test, Lift-off-Test, Patte-Test. Reverse-Schulterprothese bei irreparabler Ruptur.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 280-290" },
+    { id: 24, week: 4, day: 3, category: "Myologie", difficulty: "hard",
+      title: "Schultermuskulatur – Deltoideus und weitere",
+      content: "Der M. deltoideus ist der Hauptabduktor.",
+      details: ["M. deltoideus: 3 Anteile (clavicularis, acromialis, spinalis)","M. trapezius: Pars descendens/transversa/ascendens","M. serratus anterior: Protraktion, Winged Scapula bei Lähmung","M. rhomboideus: Retraktion, Elevation","Winged Scapula: N. thoracicus longus"],
+      orthoNote: "Sprengel-Deformität: Cavendish-Grad I-IV. Operativ bei Grad III/IV (Woodward-Operation).",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 292-300" },
+    { id: 25, week: 4, day: 4, category: "Myologie", difficulty: "hard",
+      title: "Ellenbogenbeuger und -strecker",
+      content: "Die Ellenbogenmuskulatur ermöglicht Beugen, Strecken und Rotation.",
+      details: ["M. biceps brachii: Caput longum + breve","M. brachialis: Stärkster Ellenbogenbeuger","M. brachioradialis: Beuger bei neutraler Stellung","M. triceps brachii: 3 Köpfe, Insertion Olecranon","M. anconeus: Schlussrotation, Stabilisierung"],
+      orthoNote: "Biceps-Sehnenruptur distal: Hook-Test. Operativ bei <60 J. Proximale Ruptur: Popeye-Deformität.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 302-310" },
+    { id: 26, week: 4, day: 5, category: "Myologie", difficulty: "hard",
+      title: "Hüft- und Oberschenkelmuskulatur",
+      content: "Die Hüftmuskulatur umfasst Beuger, Strecker, Abduktoren und Adduktoren.",
+      details: ["M. iliopsoas: Stärkster Hüftbeuger","M. gluteus maximus: Insertion Tractus iliotibialis","M. gluteus medius/minimus: Abduktion","Trendelenburg-Zeichen: Insuffizienz M. gluteus medius","M. tensor fasciae latae: Flexion, Abduktion"],
+      orthoNote: "Gluteus medius-Lähmung: Trendelenburg-Hinken. Ursachen: THA-Anterior-Zugang, intramuskuläre Injektionen.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 320-332" },
+    { id: 27, week: 4, day: 6, category: "Myologie", difficulty: "hard",
+      title: "Kniegelenkmuskulatur – Quadrizeps und Kniekehle",
+      content: "Der M. quadriceps femoris ist der einzige Kniegelenkstrecker.",
+      details: ["M. quadriceps femoris: 4 Köpfe (rectus, vastus lat/med/int)","Insertio: Basis Patella → Lig. patellae → Tuberositas tibiae","M. popliteus: Entschlussrotation des Knies","Fossa poplitea: A. poplitea, V. poplitea, N. tibialis, N. fibularis communis","Kniekehle: Medial Mm. semimembranosus/semitendinosus"],
+      orthoNote: "Quadrizepssehnenruptur: Primäre Naht mit transossärer Fixation. Rehabilitation: 6 Wochen Limitation 90° Beugung.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 334-342" },
+    { id: 28, week: 4, day: 7, category: "Myologie", difficulty: "hard",
+      title: "Unterschenkel- und Fußmuskulatur",
+      content: "Die Fußmuskulatur stabilisiert das Längs- und Quergewölbe.",
+      details: ["M. triceps surae: Gastrocnemius + Soleus → Achillessehne","M. tibialis anterior: Inversion, mediales Fußgewölbe","M. fibularis longus/brevis: Eversion","M. tibialis posterior: Stabilisierung Längsgewölbe","Hammerzehe: Insuffizienz intrinsischer Fußmuskeln"],
+      orthoNote: "Achillessehnenruptur: Thompson-Test. Mid-substance häufigste Lokalisation. Operativ bei aktiven Patienten.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 344-356" },
+
+    // ===== WOCHE 5: BLUTGEFÄSSE =====
+    { id: 29, week: 5, day: 1, category: "Blutgefäße", difficulty: "hard",
+      title: "Arterien der oberen Extremität – A. subclavia & axillaris",
+      content: "Die Arterien versorgen Schultergürtel, Arm, Unterarm und Hand.",
+      details: ["A. subclavia: Rechts von Truncus brachiocephalicus, links vom Aortenbogen","A. axillaris: Begleitet von Plexus brachialis","A. thoracoacromialis: 4 Äste","A. circumflexa humeri: Um Trochanter major","A. subscapularis: Größter Ast der Axillaris"],
+      orthoNote: "Thoracic outlet syndrome (TOS): Kompression im Skalenuslücke. Erste Rippe-Resektion bei Symptomen.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 400-408" },
+    { id: 30, week: 5, day: 2, category: "Blutgefäße", difficulty: "hard",
+      title: "Arterien der oberen Extremität – A. brachialis & radialis/ulnaris",
+      content: "A. brachialis setzt sich in A. radialis und A. ulnaris fort.",
+      details: ["A. brachialis: Verlauf im Sulcus bicipitalis medialis","A. profunda brachii: Mit N. radialis im Sulcus nervi radialis","A. radialis: Verlauf lateral, über Processus styloideus","A. ulnaris: Verlauf medial","Arcus palmaris profundus/superficialis: Kollateralkreislauf"],
+      orthoNote: "Humerusschaftfraktur: A. profunda brachii und N. radialis verletzbar. Frühe Exploration bei offenen Frakturen.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 410-418" },
+    { id: 31, week: 5, day: 3, category: "Blutgefäße", difficulty: "hard",
+      title: "Arterien der unteren Extremität – A. iliaca & femoralis",
+      content: "Die Arterien versorgen Becken, Oberschenkel, Unterschenkel und Fuß.",
+      details: ["A. iliaca communis: Teilung in externa und interna","A. femoralis: Unterhalb Leistenband (VAN: Vene-Arterie-Nerv)","A. profunda femoris: Äste circumflexa medialis/lateralis","A. circumflexa femoris medialis: Versorgt proximalen Femur","A. descendens genus: Rete articulare genus"],
+      orthoNote: "Hüftkopfnekrose (Morbus Perthes): Unterbrechung durch A. circumflexa femoris medialis. Kinder 4-8 J.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 420-430" },
+    { id: 32, week: 5, day: 4, category: "Blutgefäße", difficulty: "hard",
+      title: "Arterien der unteren Extremität – A. poplitea & cruralis",
+      content: "A. poplitea durchquert die Kniekehle und teilt sich in Unterschenkelarterien.",
+      details: ["A. poplitea: Fortsetzung A. femoralis ab Hiatus tendineus adductorius","A. tibialis anterior: Durch Membrana interossea","A. tibialis posterior: Tief im Unterschenkel","A. fibularis: Entlang Fibula","A. dorsalis pedis: Palpabel zwischen EHL und EDL"],
+      orthoNote: "Kompartmentsyndrom: Druck >30mmHg. 4 Logen Unterschenkel. Notfall: Fasziotomie.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 432-440" },
+    { id: 33, week: 5, day: 5, category: "Blutgefäße", difficulty: "medium",
+      title: "Venen der Extremitäten",
+      content: "Das venöse System besteht aus oberflächlichen und tiefen Venen.",
+      details: ["V. cava superior: Sammelt Blut aus oberer Körperhälfte","V. saphena magna: Längste Vene, endet Hiatus saphenus","V. saphena parva: Endet Kniekehle","Perforansvenen: Cockett I-III, Boyd, Hunter","Oberflächlich-tiefe Verbindung"],
+      orthoNote: "TVP: Wells-Score, Kompressionsultraschall. Proximale TVP → Lungenembolie-Risiko 50%.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 450-460" },
+    { id: 34, week: 5, day: 6, category: "Blutgefäße", difficulty: "hard",
+      title: "Arteria vertebralis und Willis-Kreis",
+      content: "Die hintere Hirnzirkulation sichert die Gehirnversorgung.",
+      details: ["A. vertebralis: Durch Foramina transversaria C6-C1","A. basilaris: Fusion beider Vertebralis","Circulus arteriosus cerebri (Willis): Anastomose vorderer/hinterer Kreislauf","A. cerebri anterior: Mediale Hemisphärenfläche","A. cerebri media: Größter Ast, laterale Hemisphäre"],
+      orthoNote: "Vertebralis-Dissektion: Häufigste Ursache Schlaganfall bei <45 J. MRT/MRA mit Fett-Sat-Sequenzen.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 462-470" },
+    { id: 35, week: 5, day: 7, category: "Blutgefäße", difficulty: "medium",
+      title: "Rete articulare und Kollateralkreisläufe",
+      content: "Gelenke werden durch Rete articulare versorgt.",
+      details: ["Rete genus: Descendens, suprema, recurrens tibialis anterior","Rete cubiti: Collateralis ulnaris/radialis","Rete humeri: Circumflexa humeri, thoracoacromialis","Kollateralkreislauf Hand: Arcus palmaris profundus + superficialis","Klinische Relevanz bei Gefäßverschluss"],
+      orthoNote: "Knie-Luxation → Poplitea-Ruptur in 40%. Revaskularisation innerhalb 6-8h. ABI <0.9 = pathologisch.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 472-478" },
+
+    // ===== WOCHE 6: NERVEN =====
+    { id: 36, week: 6, day: 1, category: "Nerven", difficulty: "hard",
+      title: "Plexus brachialis – Anatomie und Äste",
+      content: "Der Plexus brachialis entsteht aus C5-Th1.",
+      details: ["Trunci: Superior (C5-C6), Medius (C7), Inferior (C8-Th1)","Fasciculi: Lateralis, Posterior, Medialis","N. musculocutaneus (C5-C7): M. biceps, brachialis, coracobrachialis","N. medianus (C6-Th1): Flexoren, Thenar","N. ulnaris (C8-Th1): FCU, intrinsische Handmuskeln"],
+      orthoNote: "Brachialplexus-Läsion: Erb-Duchenne (C5-C6), Klumpke (C8-Th1). Mikrochirurgische Rekonstruktion innerhalb 6 Monaten.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 500-510" },
+    { id: 37, week: 6, day: 2, category: "Nerven", difficulty: "hard",
+      title: "N. radialis – Verlauf und Klinik",
+      content: "Der N. radialis innerviert die Streckmuskulatur.",
+      details: ["Verlauf: Axilla → Sulcus nervi radialis → Fossa cubitalis","Ramo superficialis: Sensibel dorsolateraler Unterarm","Ramo profundus (N. interosseus posterior): Extensoren","Wrist drop, Finger drop bei Lähmung","Neuropraxia: Spontanheilung 3-6 Monate"],
+      orthoNote: "Radialislähmung: Humerusschaftfraktur häufigste Ursache. Exploration bei offenen Frakturen oder keiner Besserung nach 3 Monaten.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 512-520" },
+    { id: 38, week: 6, day: 3, category: "Nerven", difficulty: "hard",
+      title: "N. medianus – Karpaltunnel und Klinik",
+      content: "Der N. medianus ist der am häufigsten komprimierte Nerv der oberen Extremität.",
+      details: ["Karpaltunnel: Begrenzung Ossa carpi + Lig. carpi transversum","Inhalt: N. medianus + 9 Sehnen","Motorisch: Lumbricales I+II, Thenar","Sensibel: Daumen, Zeige-, Mittelfinger","Ramo thenaris: Kann bei KTS erhalten bleiben"],
+      orthoNote: "KTS: Phalen-Test, Tinel-Zeichen. EMG: Distale motorische Latenz >4.5ms. Operativ bei Versagen oder Dauer >6 Monate.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 522-530" },
+    { id: 39, week: 6, day: 4, category: "Nerven", difficulty: "hard",
+      title: "N. ulnaris – Sulcus und Guyon-Loge",
+      content: "Der N. ulnaris ist an Sulcus nervi ulnaris und Guyon-Loge gefährdet.",
+      details: ["Verlauf: Sulcus nervi ulnaris → zwischen FCU-Köpfen → Guyon-Loge","Guyon-Loge: Begrenzung Os pisiforme/hamatum","Motorisch: FCU, intrinsische Handmuskeln","Sensibel: Kleinerfinger, Ulnarseite Ringfinger","Froment-Zeichen: IPG-Beugung durch FPL"],
+      orthoNote: "Ulnaris-Lähmung: Sulcus-Läsion (Druckschäden), Guyon-Loge (Hamulus-Hook-Fraktur). Klaue bei Ring- und Kleinerfinger.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 532-540" },
+    { id: 40, week: 6, day: 5, category: "Nerven", difficulty: "hard",
+      title: "Plexus lumbosacralis und N. ischiadicus",
+      content: "Der Plexus lumbosacralis versorgt die untere Extremität (L1-S4).",
+      details: ["Plexus lumbalis (L1-L4): N. femoralis, obturatorius, genitofemoralis","Plexus sacralis (L4-S4): N. ischiadicus, pudendus, gluteus superior/inferior","N. ischiadicus: Foramen infrapiriforme","N. tibialis (L4-S3): Canalis tarsi/tarsalis","N. fibularis communis (L4-S2): Um Caput fibulae"],
+      orthoNote: "Ischias: Wurzelkompression L5/S1 vs. Piriformis-Syndrom. Lasegue-Zeichen <70°. MRT bei neurologischen Defiziten.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 550-565" },
+    { id: 41, week: 6, day: 6, category: "Nerven", difficulty: "hard",
+      title: "N. fibularis communis – Peroneuslähmung",
+      content: "Der N. fibularis communis ist der am häufigsten gelähmte Nerv der unteren Extremität.",
+      details: ["Verlauf: Um Caput fibulae (subkutan, dorsal/lateral)","N. fibularis superficialis: Mm. fibulares – Eversion","N. fibularis profundus: Extensoren – Dorsalextension","Fußheberlähmung: Kombination beider Äste","Sensibel: Erster Interdigitalraum"],
+      orthoNote: "Peroneuslähmung: Knie-Luxation häufigste Ursache. AFO bei irreversibler Lähmung. Tendon-Transfer bei Dauerlähmung >12 Monate.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 570-578" },
+    { id: 42, week: 6, day: 7, category: "Nerven", difficulty: "hard",
+      title: "Dermatom, Myotom und Reflexbogen",
+      content: "Segmentale Innervation ermöglicht neurologische Lokalisation.",
+      details: ["C5: Lateraler Oberarm, C6: Daumen, C7: Mittelfinger, C8: Kleinerfinger","L4: Medialer Unterschenkel, L5: 1. IZR, S1: Lateraler Fußrand","C5: Abduktion Schulter, C6: Ellenbogenbeugung, C7: Streckung","L4: Knieextension, L5: Fußhebung, S1: Fußsenkung","Reflexe: Bizeps C5-C6, Triceps C7, Patella L3-L4, Achilles S1-S2"],
+      orthoNote: "Neurogene Claudicatio: Spinalkanalstenose. Einkaufskorb-Zeichen. Operativ: Dekompression bei neurologischem Defizit.",
+      reference: "Duale Reihe Anatomie, 24. Aufl., S. 580-590" },
+
+    // ===== WOCHE 7: ORTHOPÄDIE =====
+    { id: 43, week: 7, day: 1, category: "Orthopädie", difficulty: "hard",
+      title: "Osteoporose – Pathophysiologie und Klassifikation",
+      content: "Systemische Skeletterkrankung mit erhöhter Frakturanfälligkeit.",
+      details: ["WHO: T-Score ≤ -2,5 SD (DXA)","Primär: Postmenopausal (Typ I), senil (Typ II)","Sekundär: Glukokortikoide, Hyperthyreose, Multiple Myelom","Knochenumbau: Osteoklasten vs. Osteoblasten","FRAX-Score: 10-Jahres-Risiko"],
+      orthoNote: "Osteoporotische Wirbelkörperfraktur: BMD < -2,5. Vertebroplastie/Kyphoplastie bei persistierenden Schmerzen. Bisphosphonate: Erste Wahl.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 800-820" },
+    { id: 44, week: 7, day: 2, category: "Orthopädie", difficulty: "hard",
+      title: "Koxarthrose – Ätiologie und Therapie",
+      content: "Häufigste Indikation für Endoprothetik.",
+      details: ["Primär: Idiopathisch, altersassoziiert","Sekundär: Dysplasie, Luxation, Perthes, AVN, Trauma","Kellgren-Lawrence: Grad 0-IV","Biomechanik: Überlastung lateralen Acetabulums","Konservativ: Gewichtsreduktion, Physiotherapie, NSAID"],
+      orthoNote: "Hüft-TEP: Zementiert (ältere Patienten) vs. zementfrei (jüngere). Hüftpfannenwinkel 35-45°, Anteversion 15-25°.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 850-880" },
+    { id: 45, week: 7, day: 3, category: "Orthopädie", difficulty: "hard",
+      title: "Gonarthrose – Medial vs. lateral",
+      content: "Die häufigste Arthroseform, typischerweise mediales Kompartiment.",
+      details: ["Medial: 70%, Varus-Deformität (O-Bein)","Lateral: 15%, Valgus-Deformität (X-Bein)","Patellofemoral: Retropatellare Schmerzen","Ahlbäck: Isolierte mediale Gonarthrose","Röntgen: Gelenkspaltverschmälerung, Osteophyten"],
+      orthoNote: "Knorpeltherapie: Mikrofrakturierung, ACI, OATS. HTO bei Varus <60 J. UKA bei isoliertem Kompartiment.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 900-930" },
+    { id: 46, week: 7, day: 4, category: "Orthopädie", difficulty: "hard",
+      title: "Bandscheibenvorfall – Lumbale und Zervikale",
+      content: "Häufigste Ursache radikulärer Symptome.",
+      details: ["L4/L5: L5-Wurzel → Fußheber-Schwäche","L5/S1: S1-Wurzel → Fußsenker-Schwäche","C5/C6: C6-Wurzel → Bizeps-Schwäche","Modic: Typ I (ödematös), II (fettig), III (sklerotisch)","Cauda-equina-Syndrom: Notfall!"],
+      orthoNote: "Lumbaler Prolaps: 90% konservative Heilung innerhalb 6 Wochen. Mikrodiskektomie: Goldstandard, 90% Erfolgsrate.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 950-980" },
+    { id: 47, week: 7, day: 5, category: "Orthopädie", difficulty: "hard",
+      title: "Skoliose – Idiopathische Form",
+      content: "Häufigste deformierende Wirbelsäulenerkrankung im Wachstumsalter.",
+      details: ["AIS: 80% aller Skoliosen, Mädchen 7:1","Cobb-Winkel: >10° = Skoliose, >25° = Korsett, >45° = OP","Lenke-Klassifikation: 6 Kurventypen","Risser-Zeichen: 0-1 = hohes Progressionsrisiko","Sagittale Balance: Thorakale Kyphose 20-40°"],
+      orthoNote: "AIS: PSF mit Pedikelschrauben bei >45°. Komplikationen: Crankshaft-Phänomen, Pseudarthrose.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1000-1020" },
+    { id: 48, week: 7, day: 6, category: "Orthopädie", difficulty: "hard",
+      title: "Tumoren des Bewegungsapparats – Klassifikation",
+      content: "Knochentumoren nach biologischer Aktivität eingeteilt.",
+      details: ["WHO 2020: Benigne, Intermediär, Maligne","Osteosarkom: Häufigster primärer maligner Tumor, 10-25 J.","Ewing-Sarkom: Kleine runde blaue Zellen, 5-20 J.","Chondrosarkom: Zweithäufigster maligner, 40-60 J.","Enneking-Staging: Benigne (1-3), Maligne (IA-IIC)"],
+      orthoNote: "Osteosarkom: Neoadjuvante Chemotherapie → Resektion → adjuvante Chemotherapie. 5-Jahres-Überleben 60-70%.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1100-1130" },
+    { id: 49, week: 7, day: 7, category: "Orthopädie", difficulty: "hard",
+      title: "Infektionen – Osteomyelitis",
+      content: "Infektion des Knochens, hämatogen, posttraumatisch oder postoperativ.",
+      details: ["Akut hämatogen: Kinder, metaphysär, Staphylococcus aureus","Chronisch: Sequester, Involukrum, Cloaca","Cierny-Mader: Stadium I-IV","Posttraumatisch: Offene Frakturen (Gustilo-Anderson)","PJI: Früh, verzögert, spät"],
+      orthoNote: "PJI: MSIS-Kriterien. Zwei-Stufen-Wechsel bei chronischer Infektion. Spacer mit Antibiotika.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1150-1180" },
+
+    // ===== WOCHE 8: ORTHOPÄDIE FORTGESCHRITTEN =====
+    { id: 50, week: 8, day: 1, category: "Orthopädie", difficulty: "hard",
+      title: "Rheumatoide Arthritis – Orthopädische Aspekte",
+      content: "Chronisch-entzündliche Systemerkrankung mit Gelenkdestruktion.",
+      details: ["ACR/EULAR 2010: Gelenkbeteiligung, Serologie, Akute-Phase","Hand: Symmetrisch, MCP, PIP, MTP","Zervikal: Atlantoaxiale Subluxation (AAS)","Röntgen: Periartikuläre Osteopenie, Erosionen","Labor: RF, ACPA, CRP, BSG"],
+      orthoNote: "RA-Handchirurgie: Synovektomie, Sehnentransfer, Arthrodese, TEP. Zervikale Stabilisierung bei AAS >8mm.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1200-1230" },
+    { id: 51, week: 8, day: 2, category: "Orthopädie", difficulty: "hard",
+      title: "Pediatrische Orthopädie – Hüftdysplasie",
+      content: "Häufigste angeborene Fehlbildung des Bewegungsapparats.",
+      details: ["Inzidenz: 1-3% aller Neugeborenen, Mädchen 6:1","Graf-Ultraschall: Alpha-Winkel und Beta-Winkel","Graf-Typ I: Reif, II: Unreif, III: Dezentriert, IV: Luxiert","Barlow-Test (Luxation), Ortolani-Test (Reposition)","Risikofaktoren: Weiblich, Erstgeborene, Beckenendlage"],
+      orthoNote: "Hüftdysplasie: Pavlik-Bandage (0-6 Monate, 95% Erfolg). Open reduction + Salter-Osteotomie (18-36 Monate).",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1250-1280" },
+    { id: 52, week: 8, day: 3, category: "Orthopädie", difficulty: "hard",
+      title: "Pediatrische Orthopädie – Klumpfuß (Pes equinovarus)",
+      content: "Häufigste angeborene Fußdeformität.",
+      details: ["CAVE: Cavus, Adductus, Varus, Equinus","Inzidenz: 1-2/1000 Geburten, männlich 2:1","Ponseti-Methode: Serielle Ruhigstellungen, Tenotomie, Orthese","Pirani-Score: 6 Kriterien, >4 = schwere Form","DD: Arthrogryposis, Myelomeningozele, Zerebralparese"],
+      orthoNote: "Ponseti-Methode: Goldstandard, >90% Erfolgsrate. Tenotomie in 80-90% notwendig. Rezidiv: 10-30% bei Non-Compliance.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1280-1300" },
+    { id: 53, week: 8, day: 4, category: "Orthopädie", difficulty: "hard",
+      title: "Endoprothetik – Komplikationen und Revision",
+      content: "Endoprothesen haben begrenzte Lebensdauer.",
+      details: ["Aseptische Lockerung: Häufigste Langzeitkomplikation","Periprosthetische Fraktur: Vancouver-Klassifikation","Instabilität: Luxation (anterior/posterior)","Metallose: Metall-Metall, Pseudotumore, ALVAL","PJI: MSIS-Kriterien, Zwei-Stufen-Wechsel"],
+      orthoNote: "Hüft-TEP-Revision: Paprosky-Klassifikation Acetabulum/Femur. Trabecular Metal, modulare Revisionsschäfte. 10-Jahres-Überleben 75-85%.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1320-1360" },
+    { id: 54, week: 8, day: 5, category: "Orthopädie", difficulty: "hard",
+      title: "Sportorthopädie – ACL-Ruptur und Meniskus",
+      content: "Sportverletzungen des Kniegelenks.",
+      details: ["ACL-Ruptur: 70% nicht-kontakt (Drehung, Valgus)","Lachman-Test: Sensitivster 85%, Pivot-Shift: Spezifischster","MRT: Goldstandard, Sensitivität 95%","Meniskus: Longitudinal, Horizontal, Radial, Komplex","Meniskus-Heilungszone: Rot-rot, Rot-weiß, Weiß-weiß"],
+      orthoNote: "ACL-Rekonstruktion: Patellarsehne (schnellste Integration) vs. Hamstring vs. Quadrizepssehne. Return to sport 9-12 Monate.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1380-1420" },
+    { id: 55, week: 8, day: 6, category: "Orthopädie", difficulty: "hard",
+      title: "Sportorthopädie – Rotatorenmanschette und Impingement",
+      content: "Schulterverletzungen im Sport.",
+      details: ["Impingement: Primary (Acromien-Form) vs. Secondary (Instabilität)","Rotatorenmanschette: Partial vs. Complete (small/medium/large/massive)","SLAP-Läsion: Superior Labrum Anterior Posterior","Bankart-Läsion: Anteroinferiores Labrum + Kapsel","Overhead-Athleten: Baseball, Schwimmen, Tennis"],
+      orthoNote: "Rotatorenmanschettenrekonstruktion: Arthroskopische Einzelankernaht, Doppelreihennaht. Reverse-Prothese bei irreparabler Ruptur.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1420-1460" },
+    { id: 56, week: 8, day: 7, category: "Orthopädie", difficulty: "hard",
+      title: "Traumatologie – Frakturheilung und Klassifikation",
+      content: "Die Frakturheilung ist ein komplexer biologischer Prozess.",
+      details: ["Heilungsphasen: Hämatom, Reparative Phase, Remodeling","AO-Klassifikation: A (einfach), B (Keil), C (komplex)","Gustilo-Anderson: Offene Frakturen I-IIIC","Biologische Osteosynthese: Minimale Invasivität","Pseudarthrose: Atrophe vs. Hypertrophe"],
+      orthoNote: "Pseudarthrose: Débridement, AST (Crista iliaca), BMP, Masquelet-Technik. Vaskularisierter Fibula-Transfer bei kritischem Defekt.",
+      reference: "Orthopädie und Unfallchirurgie, Thieme, S. 1500-1550" }
+];
+
+console.log("Anatomy facts loaded:", anatomyFacts.length);
+
+// ==================== QUIZ-DATENBANK (mit gemischten Antworten) ====================
+const rawQuizQuestions = [
+    { week: 1, question: "Welcher Knochen ist das größte Sesambein des menschlichen Körpers?", correctAnswer: "Patella", wrongAnswers: ["Os pisiforme", "Fabella", "Os sesamoideum metatarsale I"], explanation: "Die Patella ist das größte Sesambein, eingelagert in der Quadrizepssehne. Sie verlängert den Hebelarm des Quadrizeps und schützt das Kniegelenk." },
+    { week: 1, question: "Welche Epiphysenfuge verschließt sich als letzte?", correctAnswer: "Proximaler Humerus", wrongAnswers: ["Distaler Femur", "Proximaler Femur", "Distaler Radius"], explanation: "Der proximale Humerus verschließt sich mit ~20 Jahren als letzte Epiphysenfuge. Klinisch relevant bei Epiphysiolysis capitis humeri." },
+    { week: 1, question: "Welche Struktur ist für die Blutversorgung des proximalen Femurkopfes am wichtigsten?", correctAnswer: "A. circumflexa femoris medialis", wrongAnswers: ["A. circumflexa femoris lateralis", "A. profunda femoris", "Lig. capitis femoris"], explanation: "Die A. circumflexa femoris medialis (lateral epiphyseal artery) ist die Hauptblutversorgung des proximalen Femurkopfes. Ihre Unterbrechung führt zu AVN." },
+    { week: 1, question: "Bei welcher Fraktur ist die Radialis-Lähmung die häufigste Nervenkomplikation?", correctAnswer: "Humerusschaftfraktur", wrongAnswers: ["Suprakondyläre Humerusfraktur", "Radiusköpfchenfraktur", "Olecranonfraktur"], explanation: "Bei der Humerusschaftfraktur verlaufen N. radialis und A. profunda brachii im Sulcus nervi radialis. Nervenlähmung in 10-18% der Fälle." },
+    { week: 1, question: "Welcher Handwurzelknochen hat die kritischste Blutversorgung?", correctAnswer: "Os scaphoideum", wrongAnswers: ["Os lunatum", "Os triquetrum", "Os capitatum"], explanation: "Das Os scaphoideum wird retrograd vom distalen Pol versorgt. Proximale Frakturen haben ein hohes Pseudarthrose-Risiko (5-15%)." },
+    { week: 1, question: "Welche Klassifikation wird bei Acetabulum-Frakturen verwendet?", correctAnswer: "Letournel", wrongAnswers: ["Garden", "AO/OTA", "Neer"], explanation: "Die Letournel-Klassifikation unterteilt Acetabulum-Frakturen in 5 elementare und 5 assoziierte Typen. Posterior-Wall-Fraktur ist die häufigste." },
+    { week: 1, question: "Was bedeutet ein Bohler-Winkel <20° bei einer Calcaneus-Fraktur?", correctAnswer: "OP-Indikation", wrongAnswers: ["Konservative Therapie", "Spontanheilung", "Pseudarthrose"], explanation: "Der Bohler-Winkel beträgt normal 20-40°. Ein Winkel <20° zeigt Gelenkdepression an und ist Indikation für ORIF." },
+    { week: 2, question: "Welche Struktur ist das stärkste Band des menschlichen Körpers?", correctAnswer: "Lig. iliofemorale", wrongAnswers: ["Lig. cruciatum anterius", "Lig. collaterale tibiale", "Lig. longitudinale anterius"], explanation: "Das Lig. iliofemorale (Bertin-Band/Y-Band) ist das stärkste Band des Körpers und verhindert die Überstreckung des Hüftgelenks." },
+    { week: 2, question: "Bei welcher Ellenbogenverletzung spricht man vom 'Terrible Triad'?", correctAnswer: "Luxation + Radiusköpfchen-Fraktur + Koronoid-Fraktur", wrongAnswers: ["Olecranon-Fraktur + Radiusköpfchen-Fraktur + Bizepssehnenruptur", "Suprakondyläre Fraktur + N. radialis-Lähmung + V. brachialis-Ruptur", "Epicondylitis + Ulnaris-Neuropathie + Kapselruptur"], explanation: "Das Terrible Triad ist die instabilste Ellenbogenverletzung und erfordert ORIF aller Strukturen." },
+    { week: 2, question: "Welcher Test ist der sensitivste für eine ACL-Ruptur?", correctAnswer: "Lachman-Test", wrongAnswers: ["Drawer-Test", "Pivot-Shift-Test", "McMurray-Test"], explanation: "Der Lachman-Test hat eine Sensitivität von ~85% und ist der sensitivste klinische Test für ACL-Ruptur." },
+    { week: 2, question: "Welche Weber-Fraktur ist immer mit einer Syndesmosenläsion assoziiert?", correctAnswer: "Weber C", wrongAnswers: ["Weber A", "Weber B", "Keine"], explanation: "Weber C-Frakturen verlaufen oberhalb der Syndesmose und sind immer mit einer Syndesmosenläsion assoziiert." },
+    { week: 2, question: "Welche Klassifikation wird bei Schenkelhalsfrakturen verwendet?", correctAnswer: "Garden", wrongAnswers: ["AO/OTA", "Neer", "Letournel"], explanation: "Die Garden-Klassifikation (I-IV) unterteilt Schenkelhalsfrakturen nach Dislokationsgrad. Garden III/IV haben hohes AVN-Risiko (15-50%)." },
+    { week: 2, question: "Was ist die häufigste Ursache einer Peroneuslähmung?", correctAnswer: "Knie-Luxation", wrongAnswers: ["Hüft-TEP", "Fibula-Kopf-Fraktur", "Kompartmentsyndrom"], explanation: "Die Knie-Luxation ist die häufigste Ursache einer Peroneuslähmung. Der N. fibularis communis wird am Caput fibulae komprimiert." },
+    { week: 2, question: "Welcher Winkel wird bei der Hüftdysplasie-Sonographie gemessen?", correctAnswer: "Alpha-Winkel (Graf)", wrongAnswers: ["Bohler-Winkel", "Cobb-Winkel", "Tönnis-Winkel"], explanation: "Der Alpha-Winkel nach Graf misst den Knochenwinkel des Darmbeins. Ein Winkel <43° indiziert Hüftdysplasie." },
+    { week: 3, question: "Welcher Nerv innerviert den M. flexor carpi ulnaris?", correctAnswer: "N. ulnaris", wrongAnswers: ["N. medianus", "N. radialis", "N. musculocutaneus"], explanation: "Der N. ulnaris innerviert den M. flexor carpi ulnaris und die intrinsische Handmuskulatur (außer Thenar)." },
+    { week: 3, question: "Welches Zeichen ist pathognomonisch für eine Ulnaris-Lähmung?", correctAnswer: "Froment-Zeichen", wrongAnswers: ["Tinel-Zeichen", "Phalen-Test", "Wartenberg-Zeichen"], explanation: "Das Froment-Zeichen zeigt eine Insuffizienz des M. adductor pollicis (N. ulnaris) an." },
+    { week: 3, question: "Welche Struktur bildet den Boden des Karpaltunnels?", correctAnswer: "Ossa carpi", wrongAnswers: ["Lig. carpi transversum", "Retinaculum flexorum", "Aponeurosis palmaris"], explanation: "Der Karpaltunnel wird dorsal von den Ossa carpi und palmares vom Lig. carpi transversum begrenzt. Inhalt: N. medianus + 9 Sehnen." },
+    { week: 3, question: "Welcher Nerv verläuft durch das Foramen infrapiriforme?", correctAnswer: "N. ischiadicus", wrongAnswers: ["N. obturatorius", "N. femoralis", "N. gluteus superior"], explanation: "Der N. ischiadicus verläuft durch das Foramen infrapiriforme (unter dem M. piriformis). Kompression führt zum Piriformis-Syndrom." },
+    { week: 3, question: "Welcher Reflex entspricht dem Segment S1?", correctAnswer: "Achillessehnenreflex", wrongAnswers: ["Patellarsehnenreflex", "Bizepsreflex", "Tricepsreflex"], explanation: "Der Achillessehnenreflex (Fußsenker) entspricht S1. Patellarsehnenreflex = L3-L4, Bizeps = C5-C6, Triceps = C7." },
+    { week: 3, question: "Was ist das klassische Trias bei Karpaltunnelsyndrom?", correctAnswer: "Nachtschmerz, Taubheitsgefühl, Schwäche", wrongAnswers: ["Rötung, Schwellung, Überwärmung", "Krepitation, Instabilität, Blockade", "Atrophie, Kontraktur, Deformität"], explanation: "Das klassische Trias des KTS umfasst nächtliche Parästhesien, Schmerzen und Schwäche der Thenarmuskulatur." },
+    { week: 3, question: "Welcher Nerv ist für die Sensibilität des ersten Interdigitalraumes zuständig?", correctAnswer: "N. fibularis profundus", wrongAnswers: ["N. fibularis superficialis", "N. tibialis", "N. saphenus"], explanation: "Der N. fibularis profundus versorgt sensibel den ersten Interdigitalraum (zwischen Groß- und zweiter Zehe)." },
+    { week: 4, question: "Welche WHO-Definition gilt für Osteoporose?", correctAnswer: "T-Score ≤ -2,5 SD", wrongAnswers: ["T-Score ≤ -1,0 SD", "Z-Score ≤ -2,0 SD", "BMD < 0,6 g/cm²"], explanation: "Die WHO definiert Osteoporose als T-Score ≤ -2,5 SD unter dem jungen Erwachsenen-Mittelwert (DXA, LWS/proximaler Femur)." },
+    { week: 4, question: "Welche Klassifikation wird bei idiopathischer Skoliose verwendet?", correctAnswer: "Lenke", wrongAnswers: ["Garden", "Kellgren-Lawrence", "Paprosky"], explanation: "Die Lenke-Klassifikation unterteilt die adoleszente idiopathische Skoliose in 6 Kurventypen basierend auf strukturellen/nicht-strukturellen Kurven." },
+    { week: 4, question: "Was ist die häufigste Ursache eines Schlaganfalls bei Patienten <45 Jahren?", correctAnswer: "Vertebralis-Dissektion", wrongAnswers: ["Atherosklerose", "Vorhofflimmern", "Moyamoya-Syndrom"], explanation: "Die Vertebralis-Dissektion ist die häufigste Ursache eines Schlaganfalls bei Patienten unter 45 Jahren." },
+    { week: 4, question: "Welche Klassifikation wird bei periprosthetischen Hüftfrakturen verwendet?", correctAnswer: "Vancouver", wrongAnswers: ["Garden", "AO/OTA", "Letournel"], explanation: "Die Vancouver-Klassifikation unterteilt periprosthetische Hüftfrakturen nach Lokalisation (A: Trochanter, B: Schaft, C: distal) und Stabilität." },
+    { week: 4, question: "Was ist das klassische Zeichen eines Kompartmentsyndroms?", correctAnswer: "Schmerz bei passiver Streckung", wrongAnswers: ["Krepitation", "Instabilität", "Hämatom"], explanation: "Der Schmerz bei passiver Streckung ist das klassische und früheste Zeichen eines Kompartmentsyndroms. Pulsverlust ist ein spätes Zeichen!" },
+    { week: 4, question: "Welche Therapie ist der Goldstandard bei idiopathischem Klumpfuß?", correctAnswer: "Ponseti-Methode", wrongAnswers: ["Kirschner-Draht-Fixation", "Talectomie", "Ilizarov-Fixateur"], explanation: "Die Ponseti-Methode (serielle Ruhigstellungen, Tenotomie, Abduktionsorthese) ist der Goldstandard mit >90% Erfolgsrate." },
+    { week: 4, question: "Welche Zone des Meniskus hat die beste Heilungsfähigkeit?", correctAnswer: "Rot-rot Zone", wrongAnswers: ["Rot-weiß Zone", "Weiß-weiß Zone", "Keine Zone"], explanation: "Die Rot-rot Zone (äußerer Meniskusrand) ist vaskularisiert und hat die beste Heilungsfähigkeit. Weiß-weiß ist avaskulär." },
+    { week: 5, question: "Welche Struktur verhindert die Überstreckung des Hüftgelenks?", correctAnswer: "Lig. iliofemorale", wrongAnswers: ["Lig. pubofemorale", "Lig. ischiofemorale", "Lig. capitis femoris"], explanation: "Das Lig. iliofemorale (Bertin-Band) ist das stärkste Band des Körpers und verhindert die Überstreckung des Hüftgelenks." },
+    { week: 5, question: "Bei welcher Fraktur ist die A. profunda brachii gefährdet?", correctAnswer: "Humerusschaftfraktur", wrongAnswers: ["Suprakondyläre Fraktur", "Kondylärer Humerus", "Olecranonfraktur"], explanation: "Die A. profunda brachii verläuft mit dem N. radialis im Sulcus nervi radialis (Spiralrille) des Humerus." },
+    { week: 5, question: "Welcher Nerv innerviert den M. opponens pollicis?", correctAnswer: "N. medianus", wrongAnswers: ["N. ulnaris", "N. radialis", "N. musculocutaneus"], explanation: "Der M. opponens pollicis wird vom N. medianus (Ramo thenaris) innerviert. Bei KTS oft der erste motorisch betroffene Muskel." },
+    { week: 5, question: "Was ist die häufigste Komplikation nach Hüft-TEP?", correctAnswer: "Aseptische Lockerung", wrongAnswers: ["Luxation", "Periprosthetische Fraktur", "Infektion"], explanation: "Die aseptische Lockerung ist die häufigste Langzeitkomplikation nach Hüft-TEP durch Partikel-Freisetzung und Osteolyse." },
+    { week: 5, question: "Welcher Test ist spezifisch für eine Rotatorenmanschettenruptur?", correctAnswer: "Jobe-Test", wrongAnswers: ["Lachman-Test", "Phalen-Test", "Tinel-Zeichen"], explanation: "Der Jobe-Test (leere-Dose-Test) prüft den M. supraspinatus. Bei positivem Test ist eine Supraspinatus-Läsion wahrscheinlich." },
+    { week: 5, question: "Welche Klassifikation wird bei Osteosarkom verwendet?", correctAnswer: "Enneking", wrongAnswers: ["Garden", "Kellgren-Lawrence", "Paprosky"], explanation: "Das Enneking-Staging unterteilt Knochentumoren in benign (1-3) und malign (IA-IIC) und bestimmt die chirurgische Strategie." },
+    { week: 5, question: "Was ist das klassische Zeichen eines Cauda-equina-Syndroms?", correctAnswer: "Sattelanästhesie", wrongAnswers: ["Hand-Schmerz", "Schulter-Steife", "Knie-Instabilität"], explanation: "Das Cauda-equina-Syndrom ist ein Notfall mit Sattelanästhesie, Sphinkterstörung und beidseitigen Radikulopathien. Sofortige OP!" },
+    { week: 6, question: "Welche Struktur bildet die mediale Begrenzung der Fossa poplitea?", correctAnswer: "M. semimembranosus/semitendinosus", wrongAnswers: ["M. biceps femoris", "M. gastrocnemius", "M. popliteus"], explanation: "Die Fossa poplitea wird medial durch M. semimembranosus/semitendinosus, lateral durch M. biceps femoris begrenzt." },
+    { week: 6, question: "Welche Arterie versorgt den proximalen Femurkopf primär?", correctAnswer: "A. circumflexa femoris medialis", wrongAnswers: ["A. circumflexa femoris lateralis", "A. profunda femoris", "A. femoralis"], explanation: "Die A. circumflexa femoris medialis (lateral epiphyseal artery) ist die Hauptblutversorgung des proximalen Femurkopfes." },
+    { week: 6, question: "Welcher Nerv ist für die Sensibilität des Daumens zuständig?", correctAnswer: "N. medianus", wrongAnswers: ["N. ulnaris", "N. radialis", "N. axillaris"], explanation: "Der N. medianus versorgt sensibel den Daumen, Zeigefinger, Mittelfinger und radialen Anteil des Ringfingers." },
+    { week: 6, question: "Was ist die häufigste Ursache einer Schulterluxation?", correctAnswer: "Anterior-inferior", wrongAnswers: ["Posterior", "Superior", "Inferior"], explanation: "95% der Schulterluxationen sind anterior-inferior. Sie führen typischerweise zu einer Bankart-Läsion und Hill-Sachs-Delle." },
+    { week: 6, question: "Welche Klassifikation wird bei offenen Frakturen verwendet?", correctAnswer: "Gustilo-Anderson", wrongAnswers: ["Garden", "AO/OTA", "Neer"], explanation: "Die Gustilo-Anderson-Klassifikation unterteilt offene Frakturen in I bis IIIC nach Weichteilschaden und Gefäßverletzung." },
+    { week: 6, question: "Welches Transplantat hat die schnellste Knochenintegration bei ACL-Rekonstruktion?", correctAnswer: "Patellarsehne (BTB)", wrongAnswers: ["Hamstring", "Quadrizepssehne", "Allograft"], explanation: "Die Patellarsehne (Bone-Tendon-Bone) hat die schnellste Knochen-zu-Knochen-Heilung (~6 Wochen) aufgrund der knöchernen Fixation." },
+    { week: 6, question: "Was ist das klassische Zeichen einer Hüftdysplasie beim Neugeborenen?", correctAnswer: "Ortolani-Klick", wrongAnswers: ["Trendelenburg-Zeichen", "Galeazzi-Zeichen", "Froment-Zeichen"], explanation: "Der Ortolani-Test erzeugt bei Hüftluxation einen charakteristischen Klick bei Abduktion und Anheben des Femurs." },
+    { week: 7, question: "Welche Klassifikation wird bei Bandscheibenvorfällen der LWS verwendet?", correctAnswer: "Modic", wrongAnswers: ["Garden", "Kellgren-Lawrence", "Paprosky"], explanation: "Die Modic-Veränderungen beschreiben Signalveränderungen in MRT: Typ I (ödematös), II (fettig), III (sklerotisch)." },
+    { week: 7, question: "Welche OP-Technik ist der Goldstandard bei AIS >45°?", correctAnswer: "Posterior instrumentierte Fusion (PSF)", wrongAnswers: ["Anterior release", "Halo-Gravitation", "Korsett-Therapie"], explanation: "Die posterior instrumentierte Fusion (PSF) mit Pedikelschrauben ist der Goldstandard bei adoleszenter idiopathischer Skoliose >45° Cobb-Winkel." },
+    { week: 7, question: "Was ist die häufigste Ursache einer Peroneuslähmung?", correctAnswer: "Knie-Luxation", wrongAnswers: ["Hüft-TEP", "Fibula-Fraktur", "Kompartmentsyndrom"], explanation: "Die Knie-Luxation ist die häufigste Ursache einer Peroneuslähmung. Der N. fibularis communis wird am Caput fibulae komprimiert." },
+    { week: 7, question: "Welche Klassifikation wird bei periprosthetischen Infektionen verwendet?", correctAnswer: "MSIS", wrongAnswers: ["Garden", "Kellgren-Lawrence", "Paprosky"], explanation: "Die MSIS-Kriterien definieren periprosthetische Infektionen durch Major-Kriterien (Sinus, 2 identische Kulturen) und Minor-Kriterien." },
+    { week: 7, question: "Was ist das klassische Zeichen eines Impingement-Syndroms?", correctAnswer: "Jobe-Test positiv", wrongAnswers: ["Trendelenburg-Zeichen", "Froment-Zeichen", "Phalen-Test positiv"], explanation: "Der Jobe-Test (leere-Dose-Test) ist positiv bei Impingement-Syndrom/Rotatorenmanschettenpathologie." },
+    { week: 7, question: "Welche Therapie ist erste Wahl bei Osteoporose?", correctAnswer: "Bisphosphonate", wrongAnswers: ["Hormonersatztherapie", "Calcitonin", "Teriparatid"], explanation: "Bisphosphonate (Alendronat, Risedronat) sind die erste Wahl bei Osteoporose und reduzieren das Frakturrisiko um 30-50%." },
+    { week: 7, question: "Was ist die häufigste Komplikation nach ACL-Rekonstruktion?", correctAnswer: "Arthrofibrose", wrongAnswers: ["Re-Ruptur", "Infektion", "Thrombose"], explanation: "Die Arthrofibrose (Kniegelenksteife) ist die häufigste Komplikation nach ACL-Rekonstruktion. Prävention durch frühe Mobilisation." },
+    { week: 8, question: "Welche Klassifikation wird bei Osteosarkom verwendet?", correctAnswer: "Enneking", wrongAnswers: ["Garden", "Kellgren-Lawrence", "Paprosky"], explanation: "Das Enneking-Staging bestimmt die chirurgische Strategie bei Knochentumoren (intralesional, marginal, weite, radikale Resektion)." },
+    { week: 8, question: "Was ist das klassische Zeichen einer Rotatorenmanschettenruptur?", correctAnswer: "Pseudoparalyse", wrongAnswers: ["Trendelenburg-Hinken", "Winged Scapula", "Foot drop"], explanation: "Die Pseudoparalyse (aktive Abduktion <90° trotz intakter Nervenfunktion) ist das klassische Zeichen einer massiven Rotatorenmanschettenruptur." },
+    { week: 8, question: "Welche OP-Technik wird bei massivem Klumpfuß-Rezidiv verwendet?", correctAnswer: "Turco-Release", wrongAnswers: ["Ponseti-Methode", "Ilizarov-Fixateur", "Talectomie"], explanation: "Die Turco-Release (medialer Release) wird bei Rezidiven oder nicht-idiopathischen Klumpfüßen verwendet. Ponseti ist Goldstandard für idiopathische Fälle." },
+    { week: 8, question: "Was ist die häufigste Ursache einer Hüftkopfnekrose?", correctAnswer: "Schenkelhalsfraktur", wrongAnswers: ["Hüftdysplasie", "Morbus Perthes", "Alkohol"], explanation: "Die Schenkelhalsfraktur (Garden III/IV) ist die häufigste erworbene Ursache einer Hüftkopfnekrose durch Unterbrechung der Blutversorgung." },
+    { week: 8, question: "Welche Klassifikation wird bei periprosthetischen Hüftfrakturen verwendet?", correctAnswer: "Vancouver", wrongAnswers: ["Garden", "AO/OTA", "Letournel"], explanation: "Die Vancouver-Klassifikation unterteilt periprosthetische Hüftfrakturen nach Lokalisation und Prothesenstabilität (B1: stabil, B2: locker, B3: schlechte Knochenqualität)." },
+    { week: 8, question: "Was ist das klassische Zeichen eines Kompartmentsyndroms?", correctAnswer: "Schmerz bei passiver Streckung", wrongAnswers: ["Krepitation", "Instabilität", "Hämatom"], explanation: "Der Schmerz bei passiver Streckung ist das klassische und früheste Zeichen eines Kompartmentsyndroms. Weitere: Überdruckschmerz, Parästhesien." },
+    { week: 8, question: "Welche Therapie ist der Goldstandard bei idiopathischem Klumpfuß?", correctAnswer: "Ponseti-Methode", wrongAnswers: ["Kirschner-Draht-Fixation", "Talectomie", "Ilizarov-Fixateur"], explanation: "Die Ponseti-Methode (serielle Ruhigstellungen, Tenotomie, Abduktionsorthese) ist der Goldstandard mit >90% Ergeitsrate bei idiopathischem Klumpfuß." }
+];
+
+// Shuffle-Funktion (Fisher-Yates)
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+// Quiz-Fragen mit gemischten Optionen erstellen
+let quizQuestions = [];
+
+function buildQuizQuestions() {
+    quizQuestions = rawQuizQuestions.map(q => {
+        const allOptions = shuffleArray([q.correctAnswer, ...q.wrongAnswers]);
+        const correctIndex = allOptions.indexOf(q.correctAnswer);
+        return {
+            week: q.week,
+            question: q.question,
+            options: allOptions,
+            correct: correctIndex,
+            explanation: q.explanation
+        };
+    });
+}
+
+// Beim ersten Laden die Fragen mischen
+buildQuizQuestions();
+
+// ==================== APP-LOGIK ====================
+
+let appState = {
+    streak: 0,
+    lastStudyDate: null,
+    completedFacts: [],  // Array von fact IDs (nicht Indizes!)
+    quizResults: [],
+    currentQuiz: [],
+    currentQuizIndex: 0,
+    currentQuizScore: 0,
+    currentScreen: 'screen-home',
+    selectedWeeks: [],
+    questionCount: 10,
+    currentTopicFilter: 'all'
+};
+
+// LocalStorage laden
+function loadState() {
+    const saved = localStorage.getItem('anatomyAppState_v2');
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        // Merge mit Defaults für neue Felder
+        appState = { ...appState, ...parsed };
+    }
+    updateStats();
+    updateWeekGrid();
+    updateDailyPreview();
+    initWeekSelector();
+}
+
+// LocalStorage speichern
+function saveState() {
+    localStorage.setItem('anatomyAppState_v2', JSON.stringify(appState));
+}
+
+// Screen wechseln
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    const navMap = {'screen-home': 0, 'screen-daily': 1, 'screen-weekly': 2, 'screen-progress': 3, 'screen-topics': 3};
+    const navIdx = navMap[screenId];
+    if (navIdx !== undefined) {
+        document.querySelectorAll('.nav-item')[navIdx]?.classList.add('active');
+    }
+
+    appState.currentScreen = screenId;
+
+    if (screenId === 'screen-daily') loadDailyFacts();
+    if (screenId === 'screen-weekly') initWeekSelector();
+    if (screenId === 'screen-topics') loadTopics();
+    if (screenId === 'screen-progress') loadProgress();
+}
+
+// Stats aktualisieren
+function updateStats() {
+    document.getElementById('streak-count').textContent = appState.streak;
+    document.getElementById('total-facts').textContent = appState.completedFacts.length;
+    document.getElementById('total-quiz').textContent = appState.quizResults.length;
+
+    const avg = appState.quizResults.length > 0 
+        ? Math.round(appState.quizResults.reduce((a,b) => a + b.score, 0) / appState.quizResults.length) 
+        : 0;
+    document.getElementById('avg-score').textContent = avg + '%';
+}
+
+// Wochen-Grid aktualisieren (Home)
+function updateWeekGrid() {
+    const grid = document.getElementById('week-grid');
+    const today = new Date().getDay();
+    const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+    grid.innerHTML = '';
+    days.forEach((d, i) => {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'week-day';
+        dayEl.textContent = d;
+        if (i === (today + 6) % 7) dayEl.classList.add('today');
+        else if (i < (today + 6) % 7) dayEl.classList.add('done');
+        else dayEl.classList.add('future');
+        grid.appendChild(dayEl);
+    });
+}
+
+// Wochen-Selektor für Quiz initialisieren
+function initWeekSelector() {
+    const container = document.getElementById('week-selector');
+    if (!container) return;
+    container.innerHTML = '';
+
+    for (let w = 1; w <= 8; w++) {
+        const btn = document.createElement('button');
+        btn.className = 'week-btn';
+        btn.textContent = 'W' + w;
+        if (appState.selectedWeeks.includes(w)) {
+            btn.classList.add('active');
+        }
+        btn.onclick = () => toggleWeek(w, btn);
+        container.appendChild(btn);
+    }
+
+    updateStartButton();
+}
+
+function toggleWeek(week, btn) {
+    const idx = appState.selectedWeeks.indexOf(week);
+    if (idx > -1) {
+        appState.selectedWeeks.splice(idx, 1);
+        btn.classList.remove('active');
+    } else {
+        appState.selectedWeeks.push(week);
+        btn.classList.add('active');
+    }
+    updateStartButton();
+    saveState();
+}
+
+function updateStartButton() {
+    const btn = document.getElementById('start-quiz-btn');
+    if (btn) {
+        btn.disabled = appState.selectedWeeks.length === 0;
+        btn.textContent = appState.selectedWeeks.length > 0 
+            ? `Quiz starten (${appState.selectedWeeks.length} Woche${appState.selectedWeeks.length > 1 ? 'n' : ''})`
+            : 'Quiz starten';
+    }
+}
+
+function setQuestionCount(count, el) {
+    appState.questionCount = count;
+    document.querySelectorAll('#quiz-start-panel .topic-tag').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    saveState();
+}
+
+// Tägliche Vorschau
+function updateDailyPreview() {
+    const today = new Date();
+    const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+    const factIndex = dayOfYear % anatomyFacts.length;
+    const fact = anatomyFacts[factIndex];
+    document.getElementById('daily-preview').textContent = fact.title;
+    document.getElementById('daily-date').textContent = today.toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'});
+}
+
+// Tägliche Fakten laden - zeigt Fakten basierend auf aktuellem Tag
+function loadDailyFacts() {
+    const container = document.getElementById('daily-facts-container');
+    container.innerHTML = '';
+
+    const today = new Date();
+    const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+
+    // 3 Fakten für heute (zyklisch durch alle Fakten)
+    for (let i = 0; i < 3; i++) {
+        const factIndex = (dayOfYear * 3 + i) % anatomyFacts.length;
+        const fact = anatomyFacts[factIndex];
+
+        const card = document.createElement('div');
+        card.className = 'card fact-card animate-in';
+        card.style.animationDelay = (i * 0.1) + 's';
+
+        const diffClass = fact.difficulty === 'easy' ? 'difficulty-easy' : fact.difficulty === 'medium' ? 'difficulty-medium' : 'difficulty-hard';
+        const diffText = fact.difficulty === 'easy' ? 'Leicht' : fact.difficulty === 'medium' ? 'Mittel' : 'Schwer';
+        const isCompleted = appState.completedFacts.includes(fact.id);
+
+        card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div class="difficulty-badge ${diffClass}">${diffText}</div>
+                ${isCompleted ? '<span style="color:var(--success);font-size:20px">✓</span>' : ''}
+            </div>
+            <div class="card-title">${fact.category} • Woche ${fact.week}, Tag ${fact.day}</div>
+            <h2>${fact.title}</h2>
+            <p>${fact.content}</p>
+            <div class="fact-detail">
+                <h4>🔬 Detaillierte Anatomie</h4>
+                <ul>${fact.details.map(d => `<li>${d}</li>`).join('')}</ul>
+            </div>
+            <div class="ortho-highlight">
+                <h4>🏥 Orthopädischer Fokus</h4>
+                <p>${fact.orthoNote}</p>
+            </div>
+            <div class="reference">
+                <strong>📚 Literatur:</strong> ${fact.reference}
+            </div>
+        `;
+        container.appendChild(card);
+    }
+}
+
+// Lektion abschließen
+function markDailyDone() {
+    const today = new Date().toDateString();
+    if (appState.lastStudyDate !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (appState.lastStudyDate === yesterday.toDateString()) {
+            appState.streak++;
+        } else {
+            appState.streak = 1;
+        }
+        appState.lastStudyDate = today;
+
+        const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+        for (let i = 0; i < 3; i++) {
+            const factIndex = (dayOfYear * 3 + i) % anatomyFacts.length;
+            const factId = anatomyFacts[factIndex].id;
+            if (!appState.completedFacts.includes(factId)) {
+                appState.completedFacts.push(factId);
+            }
+        }
+
+        saveState();
+        updateStats();
+        updateWeekGrid();
+
+        const btn = document.getElementById('done-btn');
+        btn.textContent = '✓ Abgeschlossen!';
+        btn.classList.add('btn-success');
+        btn.disabled = true;
+
+        setTimeout(() => showScreen('screen-home'), 1500);
+    }
+}
+
+// Wöchentliches Quiz starten
+function startWeeklyQuiz() {
+    // Fragen neu mischen (damit Antwortpositionen variieren)
+    buildQuizQuestions();
+
+    // Fragen aus den ausgewählten Wochen filtern
+    let availableQuestions = quizQuestions.filter(q => appState.selectedWeeks.includes(q.week));
+
+    // Falls keine Wochen ausgewählt, alle verwenden
+    if (availableQuestions.length === 0) {
+        availableQuestions = [...quizQuestions];
+    }
+
+    // Zufällig mischen und auf gewünschte Anzahl begrenzen
+    availableQuestions = shuffleArray(availableQuestions);
+    const count = Math.min(appState.questionCount, availableQuestions.length);
+    appState.currentQuiz = availableQuestions.slice(0, count);
+
+    appState.currentQuizIndex = 0;
+    appState.currentQuizScore = 0;
+
+    // UI umschalten
+    document.getElementById('quiz-start-panel').style.display = 'none';
+    document.getElementById('quiz-container').style.display = 'block';
+
+    showQuizQuestion();
+}
+
+// Quiz-Frage anzeigen
+function showQuizQuestion() {
+    const container = document.getElementById('quiz-content');
+    const progress = document.getElementById('quiz-progress');
+
+    if (appState.currentQuizIndex >= appState.currentQuiz.length) {
+        showQuizResult();
+        return;
+    }
+
+    const q = appState.currentQuiz[appState.currentQuizIndex];
+    const pct = (appState.currentQuizIndex / appState.currentQuiz.length) * 100;
+    progress.style.width = pct + '%';
+
+    container.innerHTML = `
+        <div class="quiz-question">${appState.currentQuizIndex + 1}/${appState.currentQuiz.length}. ${q.question}</div>
+        <div id="quiz-options"></div>
+        <div class="explanation" id="quiz-explanation">
+            <h4>💡 Erklärung</h4>
+            <p>${q.explanation}</p>
+        </div>
+        <button class="btn btn-primary" id="next-btn" style="display:none;margin-top:20px" onclick="nextQuizQuestion()">Weiter →</button>
+    `;
+
+    const optionsContainer = document.getElementById('quiz-options');
+    q.options.forEach((opt, idx) => {
+        const btn = document.createElement('div');
+        btn.className = 'quiz-option';
+        btn.textContent = opt;
+        btn.onclick = () => selectAnswer(idx);
+        optionsContainer.appendChild(btn);
+    });
+}
+
+// Antwort auswählen
+function selectAnswer(idx) {
+    const q = appState.currentQuiz[appState.currentQuizIndex];
+    const options = document.querySelectorAll('.quiz-option');
+    const explanation = document.getElementById('quiz-explanation');
+    const nextBtn = document.getElementById('next-btn');
+
+    options.forEach((opt, i) => {
+        opt.classList.add('disabled');
+        if (i === q.correct) opt.classList.add('correct');
+        else if (i === idx && i !== q.correct) opt.classList.add('wrong');
+    });
+
+    if (idx === q.correct) appState.currentQuizScore++;
+
+    explanation.classList.add('show');
+    nextBtn.style.display = 'block';
+}
+
+// Nächste Frage
+function nextQuizQuestion() {
+    appState.currentQuizIndex++;
+    showQuizQuestion();
+}
+
+// Quiz-Ergebnis anzeigen
+function showQuizResult() {
+    const total = appState.currentQuiz.length;
+    const score = appState.currentQuizScore;
+    const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+
+    // Ergebnis speichern mit Metadaten
+    appState.quizResults.push({
+        date: new Date().toISOString(),
+        score: pct,
+        correct: score,
+        total: total,
+        weeks: [...appState.selectedWeeks]
+    });
+    saveState();
+    updateStats();
+
+    showScreen('screen-result');
+
+    document.getElementById('result-circle').style.setProperty('--pct', pct);
+    document.getElementById('result-percent').textContent = pct + '%';
+
+    let title, subtitle;
+    if (pct >= 90) { title = 'Hervorragend! 🎉'; subtitle = 'Du beherrschst das Thema perfekt.'; }
+    else if (pct >= 70) { title = 'Sehr gut! 👏'; subtitle = 'Solides Wissen mit kleinen Lücken.'; }
+    else if (pct >= 50) { title = 'Gut gemacht! 💪'; subtitle = 'Grundlagen sind da, aber Übung nötig.'; }
+    else { title = 'Weiter üben! 📚'; subtitle = 'Wiederhole die Lektionen und versuche es erneut.'; }
+
+    document.getElementById('result-title').textContent = title;
+    document.getElementById('result-subtitle').textContent = subtitle;
+
+    document.getElementById('result-details').innerHTML = `
+        <div class="card">
+            <div class="stat-value" style="font-size:32px;color:var(--accent)">${score}/${total}</div>
+            <p style="color:var(--text2)">Richtige Antworten</p>
+        </div>
+        <div class="card">
+            <div class="stat-value" style="font-size:32px;color:var(--accent)">${appState.quizResults.length}</div>
+            <p style="color:var(--text2)">Quiz absolviert</p>
+        </div>
+    `;
+}
+
+// Quiz wiederholen
+function restartQuiz() {
+    document.getElementById('quiz-start-panel').style.display = 'block';
+    document.getElementById('quiz-container').style.display = 'none';
+    showScreen('screen-weekly');
+}
+
+// Themen laden
+function loadTopics() {
+    const container = document.getElementById('topics-container');
+    container.innerHTML = '';
+
+    const facts = appState.currentTopicFilter === 'all' 
+        ? anatomyFacts 
+        : anatomyFacts.filter(f => f.category === appState.currentTopicFilter);
+
+    facts.forEach(fact => {
+        const isCompleted = appState.completedFacts.includes(fact.id);
+        const item = document.createElement('div');
+        item.className = 'fact-item' + (isCompleted ? ' completed' : '');
+        item.innerHTML = `
+            <h3>${fact.title}</h3>
+            <p>${fact.category} • Woche ${fact.week} • ${fact.difficulty === 'easy' ? 'Leicht' : fact.difficulty === 'medium' ? 'Mittel' : 'Schwer'}</p>
+        `;
+        item.onclick = () => showFactDetail(fact);
+        container.appendChild(item);
+    });
+}
+
+function filterTopics(category) {
+    appState.currentTopicFilter = category;
+    document.querySelectorAll('#topic-filters .filter-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    loadTopics();
+}
+
+function showFactDetail(fact) {
+    const modal = document.getElementById('fact-modal');
+    const body = document.getElementById('modal-body');
+    const diffClass = fact.difficulty === 'easy' ? 'difficulty-easy' : fact.difficulty === 'medium' ? 'difficulty-medium' : 'difficulty-hard';
+    const diffText = fact.difficulty === 'easy' ? 'Leicht' : fact.difficulty === 'medium' ? 'Mittel' : 'Schwer';
+
+    body.innerHTML = `
+        <div class="difficulty-badge ${diffClass}">${diffText}</div>
+        <div class="card-title">${fact.category} • Woche ${fact.week}, Tag ${fact.day}</div>
+        <h2 style="margin-bottom:16px">${fact.title}</h2>
+        <p style="margin-bottom:16px">${fact.content}</p>
+        <div class="fact-detail">
+            <h4>🔬 Detaillierte Anatomie</h4>
+            <ul>${fact.details.map(d => `<li>${d}</li>`).join('')}</ul>
+        </div>
+        <div class="ortho-highlight">
+            <h4>🏥 Orthopädischer Fokus</h4>
+            <p>${fact.orthoNote}</p>
+        </div>
+        <div class="reference">
+            <strong>📚 Literatur:</strong> ${fact.reference}
+        </div>
+        <button class="btn btn-primary" style="margin-top:20px" onclick="markFactComplete(${fact.id});closeModal()">
+            ${appState.completedFacts.includes(fact.id) ? '✓ Bereits gelernt' : 'Als gelernt markieren'}
+        </button>
+    `;
+    modal.classList.add('active');
+}
+
+function markFactComplete(factId) {
+    if (!appState.completedFacts.includes(factId)) {
+        appState.completedFacts.push(factId);
+        saveState();
+        updateStats();
+    }
+}
+
+function closeModal(e) {
+    if (!e || e.target === document.getElementById('fact-modal')) {
+        document.getElementById('fact-modal').classList.remove('active');
+    }
+}
+
+// Fortschritt laden
+function loadProgress() {
+    const container = document.getElementById('progress-container');
+    container.innerHTML = '';
+
+    // Gesamtfortschritt
+    const totalFacts = anatomyFacts.length;
+    const completedCount = appState.completedFacts.length;
+    const overallPct = Math.round((completedCount / totalFacts) * 100);
+
+    const overallCard = document.createElement('div');
+    overallCard.className = 'card';
+    overallCard.innerHTML = `
+        <div class="card-title">Gesamtfortschritt</div>
+        <h2>${completedCount} von ${totalFacts} Fakten</h2>
+        <div style="background:var(--card2);border-radius:8px;height:12px;margin-top:12px;overflow:hidden">
+            <div style="background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;width:${overallPct}%;border-radius:8px;transition:width 0.5s"></div>
+        </div>
+        <p style="margin-top:8px;color:var(--text2)">${overallPct}% abgeschlossen</p>
+    `;
+    container.appendChild(overallCard);
+
+    // Wochen-Übersicht
+    for (let w = 1; w <= 8; w++) {
+        const weekFacts = anatomyFacts.filter(f => f.week === w);
+        const weekCompleted = weekFacts.filter(f => appState.completedFacts.includes(f.id)).length;
+        const weekPct = Math.round((weekCompleted / weekFacts.length) * 100);
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-title">Woche ${w}</div>
+            <h2>${weekFacts[0]?.category || 'Gemischt'}</h2>
+            <p>${weekCompleted} von ${weekFacts.length} Lektionen abgeschlossen</p>
+            <div style="background:var(--card2);border-radius:8px;height:8px;margin-top:12px;overflow:hidden">
+                <div style="background:var(--accent);height:100%;width:${weekPct}%;border-radius:8px;transition:width 0.5s"></div>
+            </div>
+            <p style="margin-top:6px;color:var(--text2);font-size:12px">${weekPct}%</p>
+        `;
+        container.appendChild(card);
+    }
+
+    // Quiz-Historie
+    if (appState.quizResults.length > 0) {
+        const quizCard = document.createElement('div');
+        quizCard.className = 'card';
+        const avgScore = Math.round(appState.quizResults.reduce((a,b) => a + b.score, 0) / appState.quizResults.length);
+        quizCard.innerHTML = `
+            <div class="card-title">Quiz-Historie</div>
+            <h2>${appState.quizResults.length} Quiz absolviert</h2>
+            <p>Durchschnitt: ${avgScore}%</p>
+            <div class="topic-tags" style="margin-top:12px">
+                ${appState.quizResults.map((r,i) => `<span class="topic-tag ${r.score>=70?'active':''}">Quiz ${i+1}: ${r.score}%</span>`).join('')}
+            </div>
+        `;
+        container.appendChild(quizCard);
+    }
+}
+
+// Init
+window.onload = function() {
+    loadState();
+
+    // Prüfen ob heute schon gelernt
+    const today = new Date().toDateString();
+    const btn = document.getElementById('done-btn');
+    if (btn && appState.lastStudyDate === today) {
+        btn.textContent = '✓ Heute bereits abgeschlossen';
+        btn.classList.add('btn-success');
+        btn.disabled = true;
+    }
+};
+
+</script>
+</body>
+</html>
